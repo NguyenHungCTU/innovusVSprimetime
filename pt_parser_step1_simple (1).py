@@ -5,6 +5,9 @@ PrimeTime parser - buoc 1: doc mot report va lay cac gia tri can debug.
 Muc tieu cua file nay:
   1. Doc header cua moi timing path.
   2. Doc dong format "Point ... Incr Path" de biet report co cot nao.
+     Cac cot Fanout/Cap/DTrans/Trans/Derate/Delta la optional.
+     Cot numeric moi duoc giu trong values; cot text sau Path duoc giu trong
+     text_values.
   3. Bat dau doc detail sau dong gach ngang ngay duoi Point header.
   4. Tim launch clock row, endpoint data row va tinh:
 
@@ -92,6 +95,15 @@ TRANSITION_RE = re.compile(r"(?:^|\s)([rf])(?=\s|$)", re.I)
 # significant_digits khac nhau hoac report duoc can cot hoi khac.
 COLUMN_END_TOLERANCE = 4
 
+# Ba cot cot loi. Point va Path bat buoc de parse timing table. Incr can cho
+# cong thuc tlaunch, nhung neu report khong co thi parser chi WARN, khong crash.
+CORE_COLUMN_KEYS = ("point", "incr", "path")
+
+# Cac cot detail quen thuoc la OPTIONAL. Thieu cot nao khong bi xem la loi.
+OPTIONAL_DETAIL_COLUMN_KEYS = (
+    "fanout", "cap", "dtrans", "trans", "derate", "delta",
+)
+
 # Neu point bi wrap, dong dau thuong chi co "pin (cell)"; dong sau co cac so.
 WRAPPED_POINT_RE = re.compile(
     r"^\s*(?P<point>\S+)(?:\s+\((?P<cell>[^)]*)\))?(?:\s+<-)?\s*$"
@@ -155,6 +167,7 @@ def normalize_column_name(name):
         "dtrans": "dtrans",
         "trans": "trans",
         "transition": "trans",
+        "slew": "trans",
         "derate": "derate",
         "delta": "delta",
         "incr": "incr",
@@ -178,6 +191,14 @@ def parse_table_schema(line, line_no):
     for token in re.finditer(r"\S+", line):
         label = token.group(0)
         base_key = normalize_column_name(label)
+
+        # PrimeTime -attributes co the them cot "transition" SAU Path.
+        # Cot nay la custom attribute, khong phai cot Trans/Slew chuan.
+        if label.lower() == "transition" and any(
+            column["key"] == "path" for column in columns
+        ):
+            base_key = "transition"
+
         count = used_keys.get(base_key, 0) + 1
         used_keys[base_key] = count
         key = base_key if count == 1 else "{}_{}".format(base_key, count)
@@ -190,11 +211,19 @@ def parse_table_schema(line, line_no):
         })
 
     keys = [column["key"] for column in columns]
+    known_keys = set(CORE_COLUMN_KEYS + OPTIONAL_DETAIL_COLUMN_KEYS)
     return {
         "line_no": line_no,
         "raw": line,
         "columns": columns,
         "keys": keys,
+        "present_optional_columns": [
+            key for key in OPTIONAL_DETAIL_COLUMN_KEYS if key in keys
+        ],
+        "missing_optional_columns": [
+            key for key in OPTIONAL_DETAIL_COLUMN_KEYS if key not in keys
+        ],
+        "extra_columns": [key for key in keys if key not in known_keys],
         "valid": bool(columns and columns[0]["key"] == "point" and "path" in keys),
     }
 
@@ -256,10 +285,63 @@ def assign_values_to_columns(line, schema):
     }
 
 
+def get_text_values_after_path(line, schema, numeric_values):
+    """
+    Lay cac cot text nam sau Path, vi du:
+      Supply-Net-Group = VDD1
+      Attributes       = i d u
+
+    Cot numeric them vao sau Path (Voltage, Delta_V, DvD_Delay...) da duoc
+    assign_values_to_columns() xu ly, nen ham nay se bo qua chung.
+    """
+    columns = schema["columns"]
+    path_indexes = [
+        index for index, column in enumerate(columns)
+        if column["key"] == "path"
+    ]
+    if not path_indexes:
+        return {}
+
+    path_index = path_indexes[0]
+    text_values = {}
+
+    for index in range(path_index + 1, len(columns)):
+        column = columns[index]
+        key = column["key"]
+        if key in numeric_values:
+            continue
+
+        previous = columns[index - 1]
+        left = (previous["end"] + column["start"]) // 2
+        if index + 1 < len(columns):
+            following = columns[index + 1]
+            right = (column["end"] + following["start"]) // 2
+        else:
+            right = len(line)
+
+        raw_value = line[left:right].strip()
+        if not raw_value:
+            continue
+
+        # Transition/annotation nam ngay sau Path, khong thuoc extra column.
+        tokens = raw_value.split()
+        while tokens and tokens[0] in ("r", "f", "&", "@", "H", "*", "<-"):
+            tokens.pop(0)
+        if tokens:
+            text_values[key] = " ".join(tokens)
+
+    return text_values
+
+
 def parse_row_columns(line, schema):
     data = assign_values_to_columns(line, schema)
     cut = data["first_value_start"]
     data["point_text"] = line[:cut].strip() if cut is not None else line.strip()
+    data["text_values"] = get_text_values_after_path(
+        line, schema, data["values"]
+    )
+    data["all_values"] = dict(data["values"])
+    data["all_values"].update(data["text_values"])
     data["incr"] = data["values"].get("incr")
     data["path"] = data["values"].get("path")
     return data
@@ -443,6 +525,8 @@ def compact_row(row):
         "cell": row.get("cell"),
         "transition": row.get("transition"),
         "values": row["values"],
+        "text_values": row.get("text_values", {}),
+        "all_values": row.get("all_values", row["values"]),
         "incr": row.get("incr"),
         "path": row.get("path"),
         "raw": row["raw"],
@@ -735,6 +819,15 @@ def write_debug_log(path, parsed_paths):
                 stream.write("  valid={} | keys={}\n".format(
                     schema["valid"], schema["keys"]
                 ))
+                stream.write("  optional present={}\n".format(
+                    schema["present_optional_columns"]
+                ))
+                stream.write("  optional missing={}  (allowed)\n".format(
+                    schema["missing_optional_columns"]
+                ))
+                stream.write("  extra columns={}\n".format(
+                    schema["extra_columns"] or "<none>"
+                ))
                 for column in schema["columns"]:
                     stream.write(
                         "    {:14s} key={:14s} start={:3d} end/anchor={:3d}\n".format(
@@ -768,9 +861,11 @@ def write_debug_log(path, parsed_paths):
                 stream.write("  {}: count={}\n".format(section_name, len(rows)))
                 for point in rows:
                     stream.write(
-                        "    line {} | point={} | cell={} | tran={} | values={}\n".format(
+                        "    line {} | point={} | cell={} | tran={} | "
+                        "values={} | text={}\n".format(
                             point["line_no"], point["point"], point["cell"],
-                            point["transition"], point["values"]
+                            point["transition"], point["values"],
+                            point.get("text_values", {})
                         )
                     )
 
@@ -849,12 +944,14 @@ def main():
     log_path = os.path.join(out_dir, "parse_debug.log")
 
     output = {
-        "schema": "pt_parser_step1_simple_v2",
+        "schema": "pt_parser_step1_simple_v3",
         "source": report_path,
         "unit": args.unit,
         "note": (
-            "Columns are mapped from the Point header. tcapture is intentionally "
-            "not calculated in this version."
+            "Columns are mapped dynamically from the Point header. Missing optional "
+            "columns are allowed; unknown numeric columns are stored in values and "
+            "text columns after Path are stored in text_values. tcapture is "
+            "intentionally not calculated in this version."
         ),
         "status_count": status_count,
         "paths": parsed,
