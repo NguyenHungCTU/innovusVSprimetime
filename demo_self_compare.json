@@ -1,0 +1,175 @@
+{
+  "comparison_schema_version": "1.0",
+  "reference_metadata": {
+    "run_id": "mock_run",
+    "comparison_context": "demo_func_ss",
+    "scenario": "MOCK_SS",
+    "design": "demo_top",
+    "design_revision": "demo_rev",
+    "tool": "PrimeTime",
+    "tool_version": "MOCK_NOT_PRIMETIME",
+    "exported_at_utc": "2026-09-17T18:45:37Z",
+    "time_unit": "ns",
+    "capacitance_unit": "pf",
+    "input_time_unit": "ns",
+    "input_capacitance_unit": "pf",
+    "unit_source": "user_config",
+    "pba_mode": "none",
+    "analysis_type": "max",
+    "session_kind": "single",
+    "notes": "SYNTHETIC MOCK DATA. Not exported from a licensed PrimeTime session."
+  },
+  "candidate_metadata": {
+    "run_id": "mock_run",
+    "comparison_context": "demo_func_ss",
+    "scenario": "MOCK_SS",
+    "design": "demo_top",
+    "design_revision": "demo_rev",
+    "tool": "PrimeTime",
+    "tool_version": "MOCK_NOT_PRIMETIME",
+    "exported_at_utc": "2026-09-17T18:45:37Z",
+    "time_unit": "ns",
+    "capacitance_unit": "pf",
+    "input_time_unit": "ns",
+    "input_capacitance_unit": "pf",
+    "unit_source": "user_config",
+    "pba_mode": "none",
+    "analysis_type": "max",
+    "session_kind": "single",
+    "notes": "SYNTHETIC MOCK DATA. Not exported from a licensed PrimeTime session."
+  },
+  "delta_convention": "candidate_minus_reference",
+  "match_mode": "topology",
+  "tolerance_ns": 1e-06,
+  "rows": [
+    {
+      "reference_path_ids": [
+        "P0000001"
+      ],
+      "candidate_path_ids": [
+        "P0000001"
+      ],
+      "status": "matched",
+      "topology_equal": true,
+      "reference_slack_check": "ok",
+      "candidate_slack_check": "ok",
+      "metrics": {
+        "slack_ns": {
+          "reference": -0.215,
+          "candidate": -0.215,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "arrival_ns": {
+          "reference": 1.28,
+          "candidate": 1.28,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "required_ns": {
+          "reference": 1.065,
+          "candidate": 1.065,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "tlaunch_ns": {
+          "reference": 0.3000000000000007,
+          "candidate": 0.3000000000000007,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "tcapture_ns": {
+          "reference": 0.3299999999999983,
+          "candidate": 0.3299999999999983,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "tck2q_ns": {
+          "reference": 0.095,
+          "candidate": 0.095,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "tdata_ns": {
+          "reference": 2.1719999999999997,
+          "candidate": 2.1719999999999997,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "tdata_plus_ck2q_ns": {
+          "reference": 2.267,
+          "candidate": 2.267,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "phase_shift_ns": {
+          "reference": 2,
+          "candidate": 2,
+          "delta_ns": 0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "cppr_native_ns": {
+          "reference": 0.025,
+          "candidate": 0.025,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "uncertainty_native_ns": {
+          "reference": 0.08,
+          "candidate": 0.08,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "setup_native_ns": {
+          "reference": 0.06,
+          "candidate": 0.06,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "hold_native_ns": {
+          "reference": null,
+          "candidate": null,
+          "delta_ns": null,
+          "status": "missing_value",
+          "within_tolerance": null
+        },
+        "si_data_complete_sum_ns": {
+          "reference": 0.09,
+          "candidate": 0.09,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "si_launch_complete_sum_ns": {
+          "reference": 0.06,
+          "candidate": 0.06,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        },
+        "si_capture_complete_sum_ns": {
+          "reference": 0.02,
+          "candidate": 0.02,
+          "delta_ns": 0.0,
+          "status": "available",
+          "within_tolerance": true
+        }
+      }
+    }
+  ],
+  "counts": {
+    "matched": 1
+  }
+}

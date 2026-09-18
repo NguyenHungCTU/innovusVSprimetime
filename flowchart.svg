@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">Luồng xử lý PrimeTime Collection Exporter</title>
+  <desc id="desc">Cấu hình, chọn timing path, thu thập attribute, tính metric, kiểm tra và xuất JSON CSV. Nếu có lỗi trong lúc export, giữ output partial để debug.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#527080"/></marker>
+  </defs>
+  <rect width="900" height="600" rx="18" fill="#f4f8fb"/>
+  <g fill="none" stroke="#527080" stroke-width="2" marker-end="url(#arrow)">
+    <path d="M450 87V112"/><path d="M450 172V197"/><path d="M450 257V282"/><path d="M450 342V377"/>
+    <path d="M360 422H210V511"/><path d="M540 422H690V511"/>
+  </g>
+  <g fill="#fff" stroke="#c1d2de" stroke-width="1.5">
+    <rect x="180" y="27" width="540" height="60" rx="12"/>
+    <rect x="180" y="112" width="540" height="60" rx="12"/>
+    <rect x="180" y="197" width="540" height="60" rx="12"/>
+    <rect x="180" y="282" width="540" height="60" rx="12"/>
+    <path d="M450 377L540 422L450 467L360 422Z"/>
+  </g>
+  <rect x="25" y="511" width="370" height="65" rx="12" fill="#e6f5ef" stroke="#70ac95"/>
+  <rect x="505" y="511" width="370" height="65" rx="12" fill="#fff1e6" stroke="#cea17c"/>
+  <g font-family="Arial, DejaVu Sans, sans-serif" text-anchor="middle" fill="#173748" font-size="18">
+    <text x="450" y="53" font-weight="bold">Config và đơn vị</text><text x="450" y="75" font-size="14">Group · số path · max/min · context</text>
+    <text x="450" y="139" font-weight="bold">Chọn timing paths</text><text x="450" y="161" font-size="14">get_path_groups / get_timing_paths</text>
+    <text x="450" y="224" font-weight="bold">Thu thập collection và attribute</text><text x="450" y="246" font-size="14">Path · data points · launch/capture clock paths</text>
+    <text x="450" y="309" font-weight="bold">Tính metric có đủ dữ liệu</text><text x="450" y="331" font-size="14">Giữ native values · thiếu giá trị = null</text>
+    <text x="450" y="417" font-size="16" font-weight="bold">Kiểm tra</text><text x="450" y="438" font-size="15">và ghi OK?</text>
+    <text x="260" y="413" font-size="15">Có</text><text x="640" y="413" font-size="15">Không</text>
+    <text x="210" y="538" font-weight="bold">JSON/CSV + manifest hoàn tất</text><text x="210" y="560" font-size="14">Sẵn sàng cho Python / Tk / HTML</text>
+    <text x="690" y="538" font-weight="bold">Output partial + ERROR.txt</text><text x="690" y="560" font-size="14">Giữ lại để debug · không ghi đè run cũ</text>
+  </g>
+</svg>
